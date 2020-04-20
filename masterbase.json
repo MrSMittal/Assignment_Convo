@@ -48,7 +48,7 @@
      "Movie 2": {
           "Title": "Star Wars: Eine neue Hoffnung",
           "Plot": "Der im Exil lebende Jedi-Ritter Obi-Wan Kenobi nimmt sich einen Mann namens Luke Skywalker als Sch\u00c3\u00bcler. Zusammen helfen sie der Rebellion, die Pl\u00c3\u00a4ne des b\u00c3\u00b6sen Imperiums und des Sith-Lords Darth Vader zu vereiteln. ",
-          "Runtime": 120,
+          "duration": 120,
           "Ratings": {
                "Source": "userrating",
                "Values": {
@@ -68,7 +68,7 @@
      "Movie 3": {
           "Title": "Das Dschungelbuch",
           "Plot": "Unter der Obhut des Panthers Baghira w\u00c3\u00a4chst das Findelkind Mogli bei einer Wolfsfamilie auf. Doch da ersch\u00c3\u00bcttert die R\u00c3\u00bcckkehr des menschenfressenden Tigers Shir Khan den Dschungel. Die Sorge um Mogli zwingt Baghira zu der einzig m\u00c3\u00b6glichen Entscheidung.",
-          "Runtime": 75,
+          "duration": 75,
           "Ratings": {
                "Source": "userrating",
                "Values": {
@@ -88,7 +88,7 @@
      "Movie 4": {
           "Title": "Sin City",
           "Plot": "Im S\u00c3\u00bcndenpfuhl Sin City werden drei Geschichten parallel erz\u00c3\u00a4hlt: Der Polizist Hartigan jagt einen P\u00c3\u00a4dophilen, der Outlaw Dwight muss im Rotlichtbezirk untertauchen und dem Schl\u00c3\u00a4ger Marv wird ein Mord angeh\u00c3\u00a4ngt. ",
-          "Runtime": 119,
+          "duration": 119,
           "Ratings": {
                "Source": "userrating",
                "Values": {
@@ -108,7 +108,7 @@
      "Movie 5": {
           "Title": "Indiana Jones und der letzte Kreuzzug",
           "Plot": "1912: Der junge Indiana Jones will Grabr\u00c3\u00a4ubern das Kreuz von Coronado abluchsen, um es in ein Museum zu bringen. Nach einem Zeitsprung ins Jahr 1938 k\u00c3\u00a4mpft Indy wieder um das Kreuz, diesmal erfolgreich. Anschlie\u00c3\u0178end soll er den Heiligen Gral suchen.",
-          "Runtime": 127,
+          "duration": 127,
           "Ratings": {
                "Source": "userrating",
                "Values": {

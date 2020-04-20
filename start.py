@@ -1,8 +1,28 @@
 import urllib.request as req
 import json
-from tkinter import * 
 import os
-from functools import partial  
+import cgi,cgitb
+
+def notfound(environ,start_response):
+    
+    start_response('404 Not Found',[('Content-type','text/plain')])
+    return [b'404 Not Found']
+
+class PathDispatcher:
+    def __init__(self):
+        self.pathmap={}
+    
+    def __call__(self, environ,start_response):
+        path=environ['PATH_INFO']
+        params=cgi.FieldStorage(environ['wsgi.input'],environ=environ)
+        method=environ['REQUEST_METHOD'].lower()
+        environ['params']={k:params.getvalue(k) for k in params}
+        handler=self.pathmap.get((method,path),notfound)
+        return handler(environ,start_response)
+    
+    def register(self, method, path, function):
+        self.pathmap[method.lower(),path] = function
+        return function
 
 
 #Update api key here
@@ -39,7 +59,7 @@ def reload():
             local_dictionary[f'Movie {counter}']={}
             local_dictionary[f'Movie {counter}']['Title']=local_json_object['title']
             local_dictionary[f'Movie {counter}']['Plot']=local_json_object['description']
-            local_dictionary[f'Movie {counter}']['Runtime']=local_json_object['duration']
+            local_dictionary[f'Movie {counter}']['duration']=local_json_object['duration']
             local_dictionary[f'Movie {counter}']['Ratings']={'Source':'userrating','Values':local_json_object['userrating']}
             if 'Director' in local_json_object.keys():
                 local_dictionary[f'Movie {counter}']['Director']=[x for x in local_json_object['Director']]
@@ -54,73 +74,50 @@ def reload():
     with open("masterbase.json", "w") as outfile: 
         outfile.write(json.dumps(local_dictionary,indent=5)) 
     
-    lbl3 = Label(window, text="Reload Successfull",   font=("Arial Bold", 10),fg='#0059b3')
-    lbl3.grid(column=0, row=5)
-    
-    return 'Update Successfull'
+       
+    #return 'Update Successfull'
     
     
-def Search(feild='title',value='all'):
+def Search(feild='all',value='all'):
+    print ('Method Ran')
     with open("masterbase.json", "r") as json_file: 
         local_json_object=json.load(json_file)
     
-    if feild == 'title':
+    if feild.lower() == 'all':
        if value == 'all':
-           lbl3 = Label(window, text=local_json_object,   font=("Arial Bold", 10),fg='green')
-           lbl3.grid(column=0, row=5,)
            return local_json_object
-       else:
-           for id in local_json_object:
-               if local_json_object[id]['title'].lower()==value.lower():
-                   lbl3 = Label(window, text=local_json_object[id],font=("Arial Bold", 10),fg='green')
-                   lbl3.grid(column=0, row=5,)
-                   return local_json_object[id]
+       
     else:
-       if value == 'all':
-           lbl3 = Label(window, text=local_json_object,   font=("Arial Bold", 10),fg='green')
-           lbl3.grid(column=0, row=5,)
-           return local_json_object
-       else:
-           for id in local_json_object:
-               for elem in  local_json_object[id]:
-                    if elem.lower()==feild.lower():
-                        if local_json_object[id][elem].lower()==value.lower():
-                            lbl3 = Label(window, text=local_json_object[id],font=("Arial Bold", 10),fg='green')
-                            lbl3.grid(column=0, row=5,)
-                            return local_json_object[id]
-                        
+        for id in local_json_object:
+            for elem in  local_json_object[id]:
+                if str(elem).lower()==str(feild).lower():
+                    if str(local_json_object[id][elem]).lower()==str(value).lower():
+                        return local_json_object[id]
+                
                             
-                  
+
+
+
+
+def MainMethod(environ,start_repsonse):
+    start_repsonse('200 OK',[('Context-type','text/html')] )
+    params=environ['params']
+    print (params)
+    reload()
+    print(params)
+    if len(params) == 2:
+        final_output=str(Search(feild=params['field_name'],value=params['value']))
+    else :
+        final_output=str(Search())
+
+    print (final_output)
+    yield final_output.encode('utf-8')
     
-
-
-
-window = Tk()
-window.title("Welcome to the Movie Search Tool")
-
-lbl = Label(window, text="Please Enter the movie to be searched below: ",   font=("Arial Bold", 20))
-lbl.grid(column=0, row=0)
-lbl2 = Label(window, text="Please Enter which feild to be searched: ",   font=("Arial Bold", 10))
-lbl2.grid(column=0, row=1)
-lbl3 = Label(window, text="Please Enter which value to be searched: ",   font=("Arial Bold", 10))
-lbl3.grid(column=0, row=2)
-
-
-searchFeild = Entry(window,width=70)
-searchVAl = Entry(window,width=70)
-searchFeild.grid(column=1, row=1)
-searchVAl.grid(column=1, row=2)
-print (searchFeild)
-
-reload_btn = Button(window, text="Reload", command=reload)
-
-
-search_btn=Button(window, text="Search", command=Search(searchFeild.get(),searchVAl.get()))
-
-
-search_btn.grid(column=2,row=3)
-reload_btn.grid(column=1, row=3)
-window.mainloop()
-
-print searchFeild.get()
-
+    
+if __name__ =='__main__':
+    from wsgiref.simple_server import make_server
+    
+    dispatcher=PathDispatcher()
+    dispatcher.register('GET','/api',MainMethod)
+    httpd=make_server('localhost',4444,dispatcher)
+    httpd.serve_forever()
