@@ -1,24 +1,36 @@
+# This is the assignment prepared by Shivam Mittal for Convosight Solutions.
+# The program is split into 5 parts
+# 0 - Imports
+# 1- Configurations
+# 2 - API calling and data integration
+# 3 - Search Logic
+# 4 - Funtion Calling and Server Start
+
+
 import urllib.request as req
 import json
 import os
 import cgi,cgitb
 
+
+# Page Not Found Error
 def notfound(environ,start_response):
-    
     start_response('404 Not Found',[('Content-type','text/plain')])
     return [b'404 Not Found']
 
+#Class to read the URL and variables
 class PathDispatcher:
     def __init__(self):
         self.pathmap={}
     
+    
     def __call__(self, environ,start_response):
-        path=environ['PATH_INFO']
-        params=cgi.FieldStorage(environ['wsgi.input'],environ=environ)
-        method=environ['REQUEST_METHOD'].lower()
-        environ['params']={k:params.getvalue(k) for k in params}
-        handler=self.pathmap.get((method,path),notfound)
-        return handler(environ,start_response)
+        path=environ['PATH_INFO']                                               
+        params=cgi.FieldStorage(environ['wsgi.input'],environ=environ)          # Caputring the URL
+        method=environ['REQUEST_METHOD'].lower()                                # Capturing URL method in this case its GET
+        environ['params']={k:params.getvalue(k) for k in params}                # Capturing variable from url into dictionary
+        handler=self.pathmap.get((method,path),notfound)                        # Handling 404 Error
+        return handler(environ,start_response)  
     
     def register(self, method, path, function):
         self.pathmap[method.lower(),path] = function
@@ -34,8 +46,8 @@ path_to_local_json='movies'
 
 omdb_access_query=f'http://www.omdbapi.com/?i=tt3896198&apikey={omdb_api}'
 
-master_dictionary={}
 
+#Function to merge both json from api as well s locally avaialable into a single json file
 def reload():
     local_dictionary={}
     counter=1
@@ -74,10 +86,8 @@ def reload():
     with open("masterbase.json", "w") as outfile: 
         outfile.write(json.dumps(local_dictionary,indent=5)) 
     
-       
-    #return 'Update Successfull'
-    
-    
+           
+#Function to search the content of the json file   
 def Search(feild='all',value='all'):
     print ('Method Ran')
     with open("masterbase.json", "r") as json_file: 
@@ -94,26 +104,23 @@ def Search(feild='all',value='all'):
                     if str(local_json_object[id][elem]).lower()==str(value).lower():
                         return local_json_object[id]
                 
-                            
-
-
-
-
+                
+#Method to be called on runtime i.e. main method
 def MainMethod(environ,start_repsonse):
     start_repsonse('200 OK',[('Context-type','text/html')] )
     params=environ['params']
-    print (params)
     reload()
     print(params)
     if len(params) == 2:
-        final_output=str(Search(feild=params['field_name'],value=params['value']))
+        final_output=Search(feild=params['field_name'],value=params['value'])
     else :
-        final_output=str(Search())
+        final_output=Search()
 
     print (final_output)
-    yield final_output.encode('utf-8')
-    
-    
+    yield json.dumps(final_output).encode('utf-8')
+    return final_output
+
+#Starting the Server Port 8080 was preoccupied in local machine so used 4444    
 if __name__ =='__main__':
     from wsgiref.simple_server import make_server
     
